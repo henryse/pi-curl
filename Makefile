@@ -86,3 +86,5 @@ clean: settings
 
 push: settings build_docker
 	$(docker_tag_cmd)  $(version_image) $(latest_image)
+	$(docker_cmd) push $(version_image)
+	$(docker_cmd) push $(latest_image)
