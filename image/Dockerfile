@@ -6,6 +6,7 @@ ARG PROJECT_VERSION=latest
 ARG PROJECT_NAME=not_defined
 
 RUN apk add --update curl && rm -rf /var/cache/apk/*
-COPY entrypoint.sh /
+ADD entrypoint.sh /
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["curl"]
