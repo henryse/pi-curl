@@ -16,28 +16,25 @@ else
 	source_directory:=$(CURDIR)/image
 endif
 
-docker_cmd:=$(shell if [[ `docker ps` == *"CONTAINER ID"* ]]; then echo "docker";else echo "sudo docker";fi)
 repository:=henryse/$(project_name)
 latest_image:=$(repository):latest
 version_image:=$(repository):$(project_version)
-docker_tag_cmd:=$(docker_cmd) tag
+docker_tag_cmd:=docker tag
 
 version:
 	@echo [INFO] [version]
-	@echo [INFO]    Build Makefile Version 1.00
+	@echo [INFO]    Build Makefile Version 1.01
 	@echo
 
 settings: version
 	@echo [INFO] [settings]
 	@echo [INFO]    project_version=$(project_version)
 	@echo [INFO]    project_name=$(project_name)
-	@echo [INFO]    docker_cmd=$(docker_cmd)
 	@echo [INFO]    docker_tag_cmd=$(docker_tag_cmd)
 	@echo [INFO]    repository=$(repository)
 	@echo [INFO]    latest_image=$(latest_image)
 	@echo [INFO]    version_image=$(version_image)
 	@echo [INFO]    source_directory=$(source_directory)
-	@echo [INFO]    docker_compose_cmd=$(docker_compose_cmd)
 	@echo
 
 help: settings
@@ -60,7 +57,7 @@ help: settings
 	@echo [INFO]
 	@echo [INFO] Run in interactive mode:
 	@echo [INFO]
-	@echo [INFO]     $(docker_cmd) run -t -i  $(version_image)
+	@echo [INFO]     docker run -t -i  $(version_image)
 	@echo [INFO]
 	@echo [INFO] Run as service with ports in interactive mode:
 	@echo [INFO]
@@ -68,23 +65,23 @@ help: settings
 	@echo [INFO]     make production
 
 build_docker:
-	$(docker_cmd) build --rm --build-arg PROJECT_VERSION=$(project_version) --build-arg PROJECT_NAME=$(project_name) --tag $(version_image) $(source_directory)
+	docker build --rm --build-arg PROJECT_VERSION=$(project_version) --build-arg PROJECT_NAME=$(project_name) --tag $(version_image) $(source_directory)
 	$(docker_tag_cmd) $(version_image) $(latest_image)
 
 	@echo [INFO] Handy command to run this docker image:
 	@echo [INFO]
 	@echo [INFO] Run in interactive mode:
 	@echo [INFO]
-	@echo [INFO]     $(docker_cmd) run -t -i  $(version_image) -fsSL https://www.google.com/
+	@echo [INFO]     docker run -t -i  $(version_image) -fsSL https://www.google.com/
 	@echo [INFO]
 
 build: settings build_docker
 
 clean: settings
-	$(docker_cmd) images | grep '<none>' | awk '{system("$(docker_cmd) rmi -f " $$3)}'
-	$(docker_cmd) images | grep '$(repository)' | awk '{system("$(docker_cmd) rmi -f " $$3)}'
+	docker images | grep '<none>' | awk '{system("docker rmi -f " $$3)}'
+	docker images | grep '$(repository)' | awk '{system("docker rmi -f " $$3)}'
 
 push: settings build_docker
 	$(docker_tag_cmd)  $(version_image) $(latest_image)
-	$(docker_cmd) push $(version_image)
-	$(docker_cmd) push $(latest_image)
+	docker push $(version_image)
+	docker push $(latest_image)
